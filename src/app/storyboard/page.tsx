@@ -109,7 +109,17 @@ export default function StoryboardPage() {
         const sc = scripts[s.id] || ''
         ch.push(new Paragraph({ children: [new TextRun({ text: sc || '（未填入 Script）', font: 'Georgia', size: 26, italics: true, color: sc ? '1a1a18' : 'aaa89e' })], spacing: { after: 140 }, indent: { left: 360 }, border: { left: { style: BorderStyle.SINGLE, size: 8, color: 'd8d4cc', space: 1 } } }))
         ch.push(new Paragraph({ children: [new TextRun({ text: '鏡頭選擇', font: 'Arial', size: 18, color: '8a8780' })], spacing: { after: 70 } }))
-        getLabels(s).forEach((l: string) => ch.push(new Paragraph({ children: [new TextRun({ text: `· ${l}`, font: 'Arial', size: 22 })], spacing: { after: 50 }, indent: { left: 240 } })))
+        getOptions(s).forEach((o: any) => {
+          const descText = o.description ? ` — ${o.description}` : ''
+          ch.push(new Paragraph({
+            children: [
+              new TextRun({ text: `· ${o.name}`, font: 'Arial', size: 22, bold: true }),
+              new TextRun({ text: descText, font: 'Arial', size: 22, color: '888888' })
+            ],
+            spacing: { after: 50 },
+            indent: { left: 240 }
+          }))
+        })
         if (s.id !== 'ending') ch.push(new Paragraph({ children: [new TextRun({ text: ' ', size: 20 })], spacing: { after: 0 }, border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: 'd8d4cc', space: 1 } } }))
       })
       ch.push(new Paragraph({ children: [new TextRun({ text: `生成於 ${ds} · SOON Internal System`, font: 'Arial', size: 18, color: 'aaa89e', italics: true })], spacing: { before: 600 }, alignment: AlignmentType.CENTER }))
