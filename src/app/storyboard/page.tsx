@@ -34,6 +34,12 @@ export default function StoryboardPage() {
       return { ...p, [step.id]: e ? c.filter((x: string) => x !== id) : [...c, id] }
     })
   }
+  function getOptions(s: Step) {
+    return s.options.filter(o =>
+      s.type === 'single' ? picks[s.id] === o.id : (picks[s.id] as string[] || []).includes(o.id)
+    )
+  }
+
   function getLabels(s: Step) {
     const sel = selections[s.id]
     if (s.type === 'single') {
@@ -167,8 +173,11 @@ export default function StoryboardPage() {
               <h3 style={{ fontSize: 16, fontWeight: 400, marginBottom: 12 }}>{s.name} <em style={{ color: mu }}>/ {s.nameEm}</em></h3>
               <p style={{ fontSize: 13, fontStyle: 'italic', lineHeight: 1.7, marginBottom: 8, padding: '8px 12px', borderLeft: `1.5px solid ${br}`, color: scripts[s.id] ? mu : '#c8c4bc' }}>{scripts[s.id] || '（未填入 Script）'}</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {getLabels(s).map((l: string) => (
-                  <span key={l} style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, padding: '3px 10px', border: `0.5px solid ${br}`, borderRadius: 999, background: hv, color: ink }}>{l}</span>
+                {getOptions(s).map((o: any) => (
+                  <div key={o.id} style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, padding: '5px 12px', border: `0.5px solid ${br}`, borderRadius: 6, background: hv, color: ink, lineHeight: 1.5 }}>
+                    <span style={{ fontWeight: 500 }}>{o.name}</span>
+                    {o.description && <span style={{ color: mu, marginLeft: 6 }}>— {o.description}</span>}
+                  </div>
                 ))}
               </div>
             </div>
