@@ -21,12 +21,17 @@ export async function POST(request: NextRequest) {
           content: `以下係一份 IG Reel Script，請分析並提取以下5個部分，以 JSON 格式返回（只返回 JSON，唔好加其他文字）：
 
 {
-  "opening": "【Opening Hook】嘅內容",
-  "background": "【背景 VO】嘅內容",
-  "transition": "【轉場】嘅內容",
-  "content": "【實測內容】嘅內容",
-  "ending": "【Ending】嘅內容"
+  "opening": "【Opening Hook】嘅完整內容",
+  "background": "【背景 VO】嘅完整內容",
+  "transition": "【轉場】嘅完整內容",
+  "content": "【實測內容】嘅完整內容，包括所有實測項目",
+  "ending": "【Ending】嘅完整內容"
 }
+
+重要：
+- 每個 key 都必須有內容
+- content 欄位係指【實測內容】部分，唔好遺漏
+- 如果搵唔到某部分，填入「（未找到）」
 
 Script 內容：
 ${content}`
