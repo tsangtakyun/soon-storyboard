@@ -42,7 +42,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (isLoginPage) {
-    return NextResponse.redirect(new URL('/', request.url))
+    return NextResponse.redirect(new URL('/storyboard', request.url))
   }
 
   return response
