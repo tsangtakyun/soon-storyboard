@@ -103,11 +103,12 @@ export default function StoryboardPage() {
         const sc = scripts[s.id] || ''
         ch.push(new Paragraph({ children: [new TextRun({ text: sc || '（未填入 Script）', font: 'Georgia', size: 26, italics: true, color: sc ? '1a1a18' : 'aaa89e' })], spacing: { after: 140 }, indent: { left: 360 }, border: { left: { style: BorderStyle.SINGLE, size: 8, color: 'd8d4cc', space: 1 } } }))
         ch.push(new Paragraph({ children: [new TextRun({ text: '鏡頭選擇', font: 'Arial', size: 18, color: '8a8780' })], spacing: { after: 70 } }))
-        s.options.filter(o => s.type === 'single' ? picks[s.id] === o.id : ((picks[s.id] as string[]) || []).includes(o.id)).forEach((o) => {
-          const descText = o.description ? ` — ${o.description}` : ''
+        getLabels(s).forEach((l: string) => {
+          const opt = s.options.find(o => o.name === l)
+          const descText = opt?.description ? ` — ${opt.description}` : ''
           ch.push(new Paragraph({
             children: [
-              new TextRun({ text: `· ${o.name}`, font: 'Arial', size: 22, bold: true }),
+              new TextRun({ text: `· ${l}`, font: 'Arial', size: 22, bold: true }),
               new TextRun({ text: descText, font: 'Arial', size: 22, color: '888888' })
             ],
             spacing: { after: 50 },
