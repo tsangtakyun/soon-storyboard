@@ -1,4 +1,4 @@
-'use client' // v2
+'use client'
 import { useState } from 'react'
 import { STEPS, Step } from './data/shots'
 import Image from 'next/image'
