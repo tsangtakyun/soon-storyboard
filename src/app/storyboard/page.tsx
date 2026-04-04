@@ -76,7 +76,7 @@ export default function StoryboardPage() {
         opening: analysed.opening || '',
         background: analysed.background || '',
         transition: analysed.transition || '',
-        content: analysed.content || '',
+        main: analysed.main || '',
         ending: analysed.ending || '',
       })
       setImportStatus('✓ Script 已匯入！可以開始揀分鏡')
