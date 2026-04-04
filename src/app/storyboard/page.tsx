@@ -14,6 +14,9 @@ export default function StoryboardPage() {
   const [projectName, setProjectName] = useState('')
   const [generating, setGenerating] = useState(false)
   const [genStatus, setGenStatus] = useState('')
+  const [docLink, setDocLink] = useState('')
+  const [importing, setImporting] = useState(false)
+  const [importStatus, setImportStatus] = useState('')
   const step = STEPS[currentStep]
   const cr = '#F5F2EC', ink = '#1a1a18', mu = '#8a8780', br = '#d8d4cc', hv = '#eae6de'
 
@@ -41,6 +44,47 @@ export default function StoryboardPage() {
     return ['（未選）']
   }
   function goTo(i: number) { setShowSummary(false); setCurrentStep(i) }
+
+  async function importFromDoc() {
+    if (!docLink) return
+    setImporting(true)
+    setImportStatus('讀取 Google Doc 中...')
+    try {
+      const match = docLink.match(/\/d\/([a-zA-Z0-9_-]+)/)
+      if (!match) throw new Error('無效嘅 Google Doc 連結')
+      const docId = match[1]
+
+      const res = await fetch('/api/read-script', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ docId }),
+      })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+
+      setImportStatus('AI 分析 Script 中...')
+
+      const analyseRes = await fetch('/api/analyse-script', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: data.content }),
+      })
+      const analysed = await analyseRes.json()
+      if (analysed.error) throw new Error(analysed.error)
+
+      setScripts({
+        opening: analysed.opening || '',
+        background: analysed.background || '',
+        transition: analysed.transition || '',
+        content: analysed.content || '',
+        ending: analysed.ending || '',
+      })
+      setImportStatus('✓ Script 已匯入！可以開始揀分鏡')
+    } catch (err: any) {
+      setImportStatus('匯入失敗：' + err.message)
+    }
+    setImporting(false)
+  }
 
   async function generateDocx() {
     setGenerating(true); setGenStatus('生成中…')
@@ -80,6 +124,32 @@ export default function StoryboardPage() {
         <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, letterSpacing: '0.1em', color: mu, marginBottom: 4 }}>SOON · AI MEDIA CONTENT CREATION</p>
         <h1 style={{ fontSize: 22, fontWeight: 400, margin: 0 }}>分鏡指引 <em style={{ color: mu }}>/ Beta</em></h1>
       </header>
+
+      {/* Google Doc Import */}
+      <div style={{ padding: '14px 24px', borderBottom: `0.5px solid ${br}`, background: hv }}>
+        <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, letterSpacing: '0.1em', color: mu, marginBottom: 8 }}>匯入 SCRIPT FROM GOOGLE DOC</p>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input
+            value={docLink}
+            onChange={e => setDocLink(e.target.value)}
+            placeholder="貼入 Google Doc 連結... https://docs.google.com/document/d/..."
+            style={{ flex: 1, fontFamily: 'Georgia, serif', fontSize: 13, background: 'transparent', border: `0.5px solid ${br}`, borderRadius: 4, padding: '7px 11px', outline: 'none', color: ink }}
+          />
+          <button
+            onClick={importFromDoc}
+            disabled={importing}
+            style={{ fontFamily: 'system-ui, sans-serif', fontSize: 12, padding: '9px 18px', background: ink, color: cr, border: 'none', borderRadius: 4, cursor: importing ? 'not-allowed' : 'pointer', opacity: importing ? 0.5 : 1, whiteSpace: 'nowrap' }}
+          >
+            {importing ? '匯入中...' : '匯入 Script →'}
+          </button>
+        </div>
+        {importStatus && (
+          <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: importStatus.startsWith('✓') ? '#4a8a5c' : mu, marginTop: 6 }}>
+            {importStatus}
+          </p>
+        )}
+      </div>
+
       <nav style={{ display: 'flex', borderBottom: `0.5px solid ${br}` }}>
         {STEPS.map((s, i) => (
           <button key={s.id} onClick={() => goTo(i)} style={{ flex: 1, padding: '10px 4px', fontFamily: 'system-ui, sans-serif', fontSize: 11, textAlign: 'center', background: 'none', border: 'none', borderBottom: !showSummary && i === currentStep ? `1.5px solid ${ink}` : '1.5px solid transparent', color: (!showSummary && i === currentStep) || isDone(s) ? ink : mu, cursor: 'pointer', marginBottom: -1 }}>
