@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
   "opening": "【Opening Hook】嘅完整內容",
   "background": "【背景 VO】嘅完整內容",
   "transition": "【轉場】嘅完整內容",
-  "content": "【實測內容】嘅完整內容，包括所有實測項目",
+  "main": "【實測內容】嘅完整內容，包括所有實測項目",
   "ending": "【Ending】嘅完整內容"
 }
 
