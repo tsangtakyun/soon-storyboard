@@ -13,6 +13,8 @@ export default function StoryboardPage() {
   const [scripts, setScripts] = useState<Scripts>({})
   const [projectName, setProjectName] = useState('')
   const [generating, setGenerating] = useState(false)
+  const [hoveredVideo, setHoveredVideo] = useState<string | null>(null)
+  const [audioEnabled, setAudioEnabled] = useState<string | null>(null)
   const [genStatus, setGenStatus] = useState('')
   const [docLink, setDocLink] = useState('')
   const [importing, setImporting] = useState(false)
@@ -211,21 +213,38 @@ export default function StoryboardPage() {
           <textarea value={scripts[step.id] || ''} onChange={e => setScripts(p => ({ ...p, [step.id]: e.target.value }))} placeholder={step.placeholder} rows={3} style={{ width: '100%', fontFamily: 'Georgia, serif', fontSize: 15, color: ink, background: 'transparent', border: `0.5px solid ${br}`, borderRadius: 4, padding: '10px 12px', resize: 'none', outline: 'none', lineHeight: 1.7, marginBottom: 20, boxSizing: 'border-box' }} />
           <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, letterSpacing: '0.1em', color: mu, marginBottom: 12 }}>{step.note.toUpperCase()}</p>
           {step.type === 'single' ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 24 }}>
               {step.options.map(o => {
                 const sel = selections[step.id] === o.id
                 return (
                   <button key={o.id} onClick={() => pickSingle(o.id)} style={{ textAlign: 'left', border: `0.5px solid ${sel ? ink : br}`, borderRadius: 5, padding: '11px 10px', background: sel ? hv : 'transparent', cursor: 'pointer' }}>
                     {o.video ? (
-                    <div style={{ position: 'relative', width: '100%', aspectRatio: '9/16', marginBottom: 8, borderRadius: 3, overflow: 'hidden', background: '#000' }}>
+                    <div
+                      style={{ position: 'relative', width: '100%', aspectRatio: '9/16', marginBottom: 8, borderRadius: 3, overflow: 'hidden', background: '#000' }}
+                      onMouseEnter={() => { setHoveredVideo(o.id); setAudioEnabled(prev => prev === o.id ? prev : null) }}
+                      onMouseLeave={() => setHoveredVideo(null)}
+                    >
                       <video
+                        ref={el => { if (el) { hoveredVideo === o.id ? el.play() : el.pause() } }}
                         src={o.video}
                         style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                        autoPlay
-                        muted
+                        muted={audioEnabled !== o.id}
                         loop
                         playsInline
                       />
+                      {hoveredVideo === o.id && (
+                        <button
+                          onClick={e => { e.stopPropagation(); setAudioEnabled(prev => prev === o.id ? null : o.id) }}
+                          style={{ position: 'absolute', bottom: 6, right: 6, background: 'rgba(0,0,0,0.55)', border: 'none', borderRadius: '50%', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff', fontSize: 13 }}
+                        >
+                          {audioEnabled === o.id ? '🔊' : '🔇'}
+                        </button>
+                      )}
+                      {hoveredVideo !== o.id && (
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.15)' }}>
+                          <span style={{ fontSize: 20, opacity: 0.8 }}>▶</span>
+                        </div>
+                      )}
                     </div>
                   ) : o.img ? (
                     <div style={{ position: 'relative', width: '100%', aspectRatio: '9/16', marginBottom: 8, borderRadius: 3, overflow: 'hidden' }}>
