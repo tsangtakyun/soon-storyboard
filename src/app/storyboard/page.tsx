@@ -216,7 +216,26 @@ export default function StoryboardPage() {
                 const sel = selections[step.id] === o.id
                 return (
                   <button key={o.id} onClick={() => pickSingle(o.id)} style={{ textAlign: 'left', border: `0.5px solid ${sel ? ink : br}`, borderRadius: 5, padding: '11px 10px', background: sel ? hv : 'transparent', cursor: 'pointer' }}>
-                    {o.img ? <div style={{ position: 'relative', width: '100%', aspectRatio: '9/16', marginBottom: 8, borderRadius: 3, overflow: 'hidden' }}><Image src={o.img} alt={o.name} fill style={{ objectFit: 'cover' }} sizes="200px" /></div> : <div style={{ width: '100%', aspectRatio: '9/16', marginBottom: 8, borderRadius: 3, background: hv, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: mu }}>待補充</span></div>}
+                    {o.video ? (
+                    <div style={{ position: 'relative', width: '100%', aspectRatio: '9/16', marginBottom: 8, borderRadius: 3, overflow: 'hidden', background: '#000' }}>
+                      <video
+                        src={o.video}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                      />
+                    </div>
+                  ) : o.img ? (
+                    <div style={{ position: 'relative', width: '100%', aspectRatio: '9/16', marginBottom: 8, borderRadius: 3, overflow: 'hidden' }}>
+                      <Image src={o.img} alt={o.name} fill style={{ objectFit: 'cover' }} sizes="200px" />
+                    </div>
+                  ) : (
+                    <div style={{ width: '100%', aspectRatio: '9/16', marginBottom: 8, borderRadius: 3, background: hv, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: mu }}>待補充</span>
+                    </div>
+                  )}
                     <p style={{ fontSize: 12, fontWeight: 500, color: ink, margin: '0 0 2px' }}>{o.name}</p>
                     <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: mu, lineHeight: 1.4, margin: 0 }}>{o.description}</p>
                   </button>
