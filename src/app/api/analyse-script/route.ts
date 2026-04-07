@@ -4,7 +4,10 @@ import type { NextRequest } from 'next/server'
 export async function POST(request: NextRequest) {
   try {
     const { content } = await request.json()
-    const apiKey = process.env.ANTHROPIC_API_KEY!
+    const apiKey = process.env.ANTHROPIC_API_KEY
+    if (!apiKey) {
+      return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 })
+    }
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -40,6 +43,10 @@ ${content}`
     })
 
     const data = await res.json()
+    if (!res.ok) {
+      const message = data?.error?.message || data?.error || 'Anthropic request failed'
+      throw new Error(message)
+    }
     const text = data.content?.[0]?.text || ''
     const jsonMatch = text.match(/\{[\s\S]*\}/)
     if (!jsonMatch) throw new Error('Cannot parse AI response')

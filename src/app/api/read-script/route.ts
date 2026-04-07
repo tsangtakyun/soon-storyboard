@@ -2,12 +2,16 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvOfWRFXarx1OXXz-CTLVz3y7_oWctRejaG-S5eXh6JIxYhmrLv9DyWl3WA9HZadY1YA/exec'
-const SECRET = 'soon-bbo-2026'
 
 export async function POST(request: NextRequest) {
   try {
+    const secret = process.env.SOON_APPS_SCRIPT_SECRET
+    if (!secret) {
+      return NextResponse.json({ error: 'SOON_APPS_SCRIPT_SECRET not configured' }, { status: 500 })
+    }
+
     const { docId } = await request.json()
-    const url = `${APPS_SCRIPT_URL}?action=read&docId=${encodeURIComponent(docId)}&secret=${SECRET}`
+    const url = `${APPS_SCRIPT_URL}?action=read&docId=${encodeURIComponent(docId)}&secret=${secret}`
     const res = await fetch(url, { method: 'GET', redirect: 'follow' })
     const text = await res.text()
     let data
