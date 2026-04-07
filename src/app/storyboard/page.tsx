@@ -13,6 +13,13 @@ const mu = '#8a8780'
 const br = '#d8d4cc'
 const hv = '#eae6de'
 
+type Recommendation = {
+  picks: string[]
+  reason: string
+  shootingTip: string
+  editTip: string
+}
+
 export default function StoryboardPage() {
   const [currentStep, setCurrentStep] = useState(0)
   const [selections, setSelections] = useState<Selections>({})
@@ -69,6 +76,114 @@ export default function StoryboardPage() {
     const sel = selections[s.id]
     if (s.type === 'single') return sel === optionId
     return Array.isArray(sel) && sel.includes(optionId)
+  }
+
+  function getRecommendation(s: Step, script: string): Recommendation {
+    const text = script.toLowerCase()
+    const hasNumbers = /[\d$%]|幾|價錢|價格|平|貴|預算|票|收費/.test(script)
+    const hasEmotion = /驚|震撼|開心|失望|崩潰|激動|驚喜|反應|wow|amazing|insane|sad|emotional/.test(text + script)
+    const hasPlace = /地址|位於|喺|在|附近|景點|地方|餐廳|咖啡店|商場|市場|公園|aquarium|cafe|restaurant|hotel/.test(text + script)
+    const hasAction = /試|食|玩|用|行|睇|體驗|開箱|挑戰|demo|test|walk|enter|show/.test(text + script)
+    const hasReveal = /原來|竟然|但係|之後|跟住|突然|一轉|push|reveal|turn/.test(text + script)
+
+    if (s.id === 'opening') {
+      if (hasEmotion || hasReveal) {
+        return {
+          picks: ['拍法 A'],
+          reason: '呢段開場有情緒或反轉感，先用最強 hook 拍法會最快拉住觀眾。',
+          shootingTip: '主持第一句前 1 秒已經要入戲，表情同手勢要即刻到位。',
+          editTip: '第一個 cut 保持極短，1-2 秒內就要入主資訊。',
+        }
+      }
+      return {
+        picks: ['拍法 C'],
+        reason: '呢段較似帶觀眾入場景，先用移動 reveal 建立空間感最穩陣。',
+        shootingTip: '主持向前行時保持步速穩定，鏡頭追得貼少少會更自然。',
+        editTip: '先見主持再見背景，cut 點落喺露出主體一刻會最順。',
+      }
+    }
+
+    if (s.id === 'background') {
+      if (hasPlace) {
+        return {
+          picks: ['環境鏡頭', '主持行入鏡頭', 'Medium shot'],
+          reason: '呢段有明顯場地資訊，先 wide 建立地點，再由主持承接資訊最清楚。',
+          shootingTip: '先拍空景，再拍主持入鏡；主持講解版保持眼神穩定。',
+          editTip: 'wide 2-3 秒後 cut 去主持，字幕可疊喺 medium shot。',
+        }
+      }
+      if (hasNumbers) {
+        return {
+          picks: ['Medium shot', '文字卡資訊', 'Close-up'],
+          reason: '呢段資訊量較多，應該用主持講解加字幕卡消化重點。',
+          shootingTip: '數字位講慢半拍，記得為字幕留空位。',
+          editTip: '數字重點最好獨立成一個 cut，令觀眾更易消化。',
+        }
+      }
+      return {
+        picks: ['環境鏡頭', 'B-roll 剪接', 'Medium shot'],
+        reason: '背景段最穩陣係用空景同 B-roll 先鋪氣氛，再由主持補足資訊。',
+        shootingTip: 'B-roll 儘量拍多幾個角度，方便之後節奏剪接。',
+        editTip: '用 2-3 個快 cut 做鋪墊，再落主持正講會自然好多。',
+      }
+    }
+
+    if (s.id === 'transition') {
+      if (hasReveal) {
+        return {
+          picks: ['拍法 D'],
+          reason: '呢段有明顯由人帶去主體嘅感覺，用指向加 reveal 最啱。',
+          shootingTip: '主持指向時要明確，鏡頭穿過去主體要一氣呵成。',
+          editTip: '把 reveal 點對準關鍵資訊或主體出現一刻。',
+        }
+      }
+      return {
+        picks: ['拍法 B'],
+        reason: '如果轉場重點係一句說話帶去下一段，固定推前加 soundbite 會最穩。',
+        shootingTip: '主持最後一句要留拍子，方便後面接 main content。',
+        editTip: '轉場尾音可直接疊入下一段第一個畫面。',
+      }
+    }
+
+    if (s.id === 'main') {
+      if (hasAction && hasEmotion) {
+        return {
+          picks: ['使用過程', '反應鏡頭', '試食／試用特寫'],
+          reason: '呢段既有實際動作又有反應，應該同時交代過程同真實感受。',
+          shootingTip: '同一個動作拍 wide、medium、close 三個版本，後面剪接會靈活好多。',
+          editTip: '先過程後反應，關鍵一啖／一試嗰刻要留 close-up。',
+        }
+      }
+      if (hasNumbers) {
+        return {
+          picks: ['產品特寫', '數據字幕', '對比展示'],
+          reason: '呢段偏資訊型內容，應該用特寫配數據卡同對比鏡頭。',
+          shootingTip: '價格、份量、前後對比全部拍獨立鏡頭，唔好塞埋一個 shot。',
+          editTip: '數據字幕最好同產品特寫同步出，令資訊更入腦。',
+        }
+      }
+      return {
+        picks: ['產品特寫', '使用過程', '多角度拍攝'],
+        reason: '呢段以展示內容為主，先俾觀眾睇清楚，再用角度變化保持節奏。',
+        shootingTip: '每個重點都至少拍一個乾淨 close-up，留畀剪接做保險。',
+        editTip: '角度切換要跟節奏點，避免畫面太平。',
+      }
+    }
+
+    if (hasEmotion) {
+      return {
+        picks: ['拍法 B'],
+        reason: '結尾有感受輸出，用主持收尾再離場會最有人味。',
+        shootingTip: '最後一句講完先停半秒，再開始離場。',
+        editTip: '感想尾句可以留空氣感，唔好太快 cut 黑。',
+      }
+    }
+    return {
+      picks: ['拍法 A'],
+      reason: '結尾偏向收束主題，用主持講完感想再帶返產品最穩陣。',
+      shootingTip: '產品最後停留一個乾淨畫面，方便做 end card。',
+      editTip: '最後一個產品鏡頭可多留 8-12 frames 畀字幕或 logo。',
+    }
   }
 
   async function importFromDoc() {
@@ -406,17 +521,34 @@ export default function StoryboardPage() {
           <div style={{ border: `0.5px solid ${br}`, borderRadius: 8, background: '#fffdf9', padding: 16, marginBottom: 16 }}>
             <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, letterSpacing: '0.1em', color: mu, marginBottom: 12 }}>LIVE SUMMARY</p>
             <div style={{ display: 'grid', gap: 12 }}>
-              {STEPS.map(s => (
-                <div key={s.id} style={{ paddingBottom: 10, borderBottom: `0.5px solid ${br}` }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 5 }}>
-                    <span style={{ fontSize: 13 }}>{s.name}</span>
-                    <span style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: isDone(s) ? '#4a8a5c' : mu }}>
-                      {isDone(s) ? '已完成' : '未選'}
-                    </span>
+              {STEPS.map(s => {
+                const recommendation = getRecommendation(s, scripts[s.id] || '')
+                return (
+                  <div key={s.id} style={{ paddingBottom: 12, borderBottom: `0.5px solid ${br}` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
+                      <span style={{ fontSize: 13 }}>{s.name}</span>
+                      <span style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: isDone(s) ? '#4a8a5c' : mu }}>
+                        {isDone(s) ? '已完成' : '未選'}
+                      </span>
+                    </div>
+                    <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: mu, margin: '0 0 4px' }}>已選拍法</p>
+                    <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: mu, lineHeight: 1.5, margin: '0 0 8px' }}>{getLabels(s).join(' / ')}</p>
+                    <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: mu, margin: '0 0 4px' }}>推薦拍法組合</p>
+                    <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: ink, lineHeight: 1.5, margin: '0 0 6px' }}>{recommendation.picks.join(' / ')}</p>
+                    <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: mu, lineHeight: 1.5, margin: '0 0 8px' }}>{recommendation.reason}</p>
+                    <div style={{ display: 'grid', gap: 6 }}>
+                      <div style={{ padding: '7px 8px', borderRadius: 6, background: hv }}>
+                        <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: mu, margin: '0 0 3px' }}>拍攝提示</p>
+                        <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: ink, lineHeight: 1.5, margin: 0 }}>{recommendation.shootingTip}</p>
+                      </div>
+                      <div style={{ padding: '7px 8px', borderRadius: 6, background: hv }}>
+                        <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: mu, margin: '0 0 3px' }}>剪接提示</p>
+                        <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: ink, lineHeight: 1.5, margin: 0 }}>{recommendation.editTip}</p>
+                      </div>
+                    </div>
                   </div>
-                  <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: mu, lineHeight: 1.5, margin: 0 }}>{getLabels(s).join(' / ')}</p>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 
