@@ -7,11 +7,11 @@ import { STEPS, Step } from './data/shots'
 type Selections = { [stepId: string]: string | string[] }
 type Scripts = { [stepId: string]: string }
 
-const cr = '#F5F2EC'
-const ink = '#1a1a18'
-const mu = '#8a8780'
-const br = '#d8d4cc'
-const hv = '#eae6de'
+const cr = '#171a2f'
+const ink = '#f5f7ff'
+const mu = '#8e94ba'
+const br = 'rgba(255,255,255,0.08)'
+const hv = 'rgba(255,255,255,0.04)'
 
 type Recommendation = {
   picks: string[]
@@ -34,6 +34,12 @@ export default function StoryboardPage() {
   const [importStatus, setImportStatus] = useState('')
 
   const step = STEPS[currentStep]
+  const card = {
+    border: `1px solid ${br}`,
+    background: 'rgba(34, 38, 68, 0.88)',
+    borderRadius: 22,
+    boxShadow: '0 18px 40px rgba(4, 6, 20, 0.26)',
+  } as const
 
   function isDone(s: Step) {
     const sel = selections[s.id]
@@ -348,33 +354,38 @@ export default function StoryboardPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: cr, color: ink, fontFamily: 'Georgia, serif' }}>
-      <header style={{ padding: '20px 24px 16px', borderBottom: `0.5px solid ${br}` }}>
-        <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, letterSpacing: '0.1em', color: mu, marginBottom: 4 }}>SOON · AI MEDIA CONTENT CREATION</p>
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-          <div>
-            <h1 style={{ fontSize: 22, fontWeight: 400, margin: 0 }}>分鏡指引 <em style={{ color: mu }}>/ Beta</em></h1>
-            <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 12, color: mu, margin: '6px 0 0' }}>左邊睇 script，中間揀鏡頭，右邊隨時檢查整體節奏。</p>
+    <div style={{ minHeight: '100vh', background: cr, color: ink, fontFamily: "'DM Sans', sans-serif" }}>
+      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet" />
+      <header style={{ padding: '28px 24px 12px' }}>
+        <div style={{ ...card, padding: 28 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+            <div>
+              <p style={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: mu, margin: '0 0 10px' }}>SOON 分鏡工作台</p>
+              <h1 style={{ fontSize: 46, lineHeight: 1.02, fontWeight: 600, margin: 0 }}>IG Reel 分鏡工作台</h1>
+              <p style={{ fontSize: 15, color: '#c9cdec', margin: '14px 0 0', lineHeight: 1.7, maxWidth: 760 }}>左邊導入劇本，中間選鏡頭與拍法，右邊即時檢查每一段建議與整體節奏，直接承接 SOON 內部劇本流程。</p>
+            </div>
+            <div style={{ padding: '14px 16px', borderRadius: 16, border: '1px solid rgba(130,126,255,0.3)', background: 'rgba(111,107,255,0.12)', fontSize: 13, color: '#c9cdec' }}>
+              {doneCount()} / {STEPS.length} 段已完成
+            </div>
           </div>
-          <div style={{ fontFamily: 'system-ui, sans-serif', fontSize: 12, color: mu }}>{doneCount()} / {STEPS.length} steps 完成</div>
         </div>
       </header>
 
-      <div style={{ padding: 24, display: 'grid', gridTemplateColumns: '320px minmax(0, 1fr) 320px', gap: 20, alignItems: 'start' }}>
-        <aside style={{ position: 'sticky', top: 20 }}>
-          <div style={{ border: `0.5px solid ${br}`, background: hv, borderRadius: 8, padding: 16, marginBottom: 16 }}>
+      <div style={{ padding: '8px 24px 40px', display: 'grid', gridTemplateColumns: '320px minmax(0, 1fr) 320px', gap: 20, alignItems: 'start' }}>
+        <aside style={{ position: 'sticky', top: 84 }}>
+          <div style={{ ...card, background: 'rgba(34, 38, 68, 0.96)', padding: 16, marginBottom: 16 }}>
             <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, letterSpacing: '0.1em', color: mu, marginBottom: 8 }}>IMPORT SCRIPT</p>
             <div style={{ display: 'grid', gap: 8 }}>
               <input
                 value={docLink}
                 onChange={e => setDocLink(e.target.value)}
                 placeholder="貼入 Google Doc 連結..."
-                style={{ width: '100%', fontFamily: 'Georgia, serif', fontSize: 13, background: 'transparent', border: `0.5px solid ${br}`, borderRadius: 4, padding: '9px 11px', outline: 'none', color: ink, boxSizing: 'border-box' }}
+                style={{ width: '100%', fontFamily: "'DM Sans', sans-serif", fontSize: 13, background: 'rgba(255,255,255,0.04)', border: `1px solid ${br}`, borderRadius: 14, padding: '12px 14px', outline: 'none', color: ink, boxSizing: 'border-box' }}
               />
               <button
                 onClick={importFromDoc}
                 disabled={importing}
-                style={{ fontFamily: 'system-ui, sans-serif', fontSize: 12, padding: '10px 14px', background: ink, color: cr, border: 'none', borderRadius: 4, cursor: importing ? 'not-allowed' : 'pointer', opacity: importing ? 0.5 : 1 }}
+                style={{ fontFamily: 'system-ui, sans-serif', fontSize: 12, padding: '12px 14px', background: 'linear-gradient(135deg,#7b61ff,#5e8bff)', color: '#fff', border: 'none', borderRadius: 14, cursor: importing ? 'not-allowed' : 'pointer', opacity: importing ? 0.5 : 1 }}
               >
                 {importing ? '匯入中...' : '匯入 Script →'}
               </button>
@@ -386,7 +397,7 @@ export default function StoryboardPage() {
             )}
           </div>
 
-          <div style={{ border: `0.5px solid ${br}`, background: '#fffdf9', borderRadius: 8, overflow: 'hidden' }}>
+          <div style={{ ...card, overflow: 'hidden' }}>
             {STEPS.map((s, index) => {
               const active = index === currentStep
               const done = isDone(s)
@@ -401,8 +412,8 @@ export default function StoryboardPage() {
                     gap: 10,
                     padding: '14px 14px',
                     border: 'none',
-                    borderBottom: index < STEPS.length - 1 ? `0.5px solid ${br}` : 'none',
-                    background: active ? hv : 'transparent',
+                    borderBottom: index < STEPS.length - 1 ? `1px solid ${br}` : 'none',
+                    background: active ? 'rgba(111,107,255,0.16)' : 'transparent',
                     cursor: 'pointer',
                     textAlign: 'left',
                     alignItems: 'center',
@@ -410,10 +421,10 @@ export default function StoryboardPage() {
                 >
                   <span style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: mu }}>{s.num}</span>
                   <span>
-                    <span style={{ display: 'block', fontSize: 14, color: ink }}>{s.name}</span>
+                    <span style={{ display: 'block', fontSize: 14, color: ink, fontWeight: active ? 700 : 500 }}>{s.name}</span>
                     <span style={{ display: 'block', fontFamily: 'system-ui, sans-serif', fontSize: 10, color: mu }}>{s.nameEm}</span>
                   </span>
-                  <span style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: done ? '#4a8a5c' : mu }}>{done ? '已選' : '未選'}</span>
+                  <span style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: done ? '#8df0b4' : mu }}>{done ? '已選' : '未選'}</span>
                 </button>
               )
             })}
@@ -427,14 +438,14 @@ export default function StoryboardPage() {
             <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 12, color: mu, margin: 0 }}>{step.note}</p>
           </div>
 
-          <section style={{ border: `0.5px solid ${br}`, borderRadius: 8, padding: 16, background: '#fffdf9', marginBottom: 18 }}>
+          <section style={{ ...card, padding: 20, marginBottom: 18 }}>
             <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, letterSpacing: '0.1em', color: mu, marginBottom: 8 }}>SCRIPT SECTION</p>
             <textarea
               value={scripts[step.id] || ''}
               onChange={e => setScripts(prev => ({ ...prev, [step.id]: e.target.value }))}
               placeholder={step.placeholder}
               rows={6}
-              style={{ width: '100%', fontFamily: 'Georgia, serif', fontSize: 15, color: ink, background: 'transparent', border: `0.5px solid ${br}`, borderRadius: 4, padding: '10px 12px', resize: 'vertical', outline: 'none', lineHeight: 1.7, boxSizing: 'border-box' }}
+              style={{ width: '100%', fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: ink, background: 'rgba(255,255,255,0.04)', border: `1px solid ${br}`, borderRadius: 14, padding: '12px 14px', resize: 'vertical', outline: 'none', lineHeight: 1.7, boxSizing: 'border-box' }}
             />
           </section>
 
@@ -449,13 +460,13 @@ export default function StoryboardPage() {
                     onClick={() => (step.type === 'single' ? pickSingle(step.id, option.id) : pickMulti(step.id, option.id))}
                     style={{
                       textAlign: 'left',
-                      border: `0.5px solid ${selected ? ink : br}`,
-                      borderRadius: 8,
-                      padding: 10,
-                      background: selected ? hv : '#fffdf9',
-                      cursor: 'pointer',
-                    }}
-                  >
+                    border: `1px solid ${selected ? 'rgba(130,126,255,0.52)' : br}`,
+                    borderRadius: 18,
+                    padding: 10,
+                    background: selected ? 'rgba(111,107,255,0.12)' : 'rgba(34, 38, 68, 0.88)',
+                    cursor: 'pointer',
+                  }}
+                >
                     {option.video ? (
                       <div
                         style={{ position: 'relative', width: '100%', aspectRatio: '9/16', marginBottom: 8, borderRadius: 6, overflow: 'hidden', background: '#000' }}
@@ -499,15 +510,15 @@ export default function StoryboardPage() {
                         <Image src={option.img} alt={option.name} fill style={{ objectFit: 'cover' }} sizes="240px" />
                       </div>
                     ) : (
-                      <div style={{ width: '100%', aspectRatio: '9/16', marginBottom: 8, borderRadius: 6, background: hv, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 12, boxSizing: 'border-box' }}>
+                      <div style={{ width: '100%', aspectRatio: '9/16', marginBottom: 8, borderRadius: 12, background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 12, boxSizing: 'border-box' }}>
                         <span style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: mu, textAlign: 'center', lineHeight: 1.5 }}>暫未有示範片
                           <br />先按描述揀鏡頭
                         </span>
                       </div>
                     )}
-                    <p style={{ fontSize: 13, fontWeight: 500, color: ink, margin: '0 0 4px' }}>{option.name}</p>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: ink, margin: '0 0 4px' }}>{option.name}</p>
                     <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: mu, lineHeight: 1.5, margin: 0 }}>{option.description}</p>
-                    <div style={{ marginTop: 8, fontFamily: 'system-ui, sans-serif', fontSize: 11, color: selected ? ink : mu }}>
+                    <div style={{ marginTop: 8, fontFamily: 'system-ui, sans-serif', fontSize: 11, color: selected ? '#f7f8ff' : mu }}>
                       {selected ? '✓ 已加入' : step.type === 'single' ? '選擇這個拍法' : '加入這個拍法'}
                     </div>
                   </button>
@@ -517,17 +528,17 @@ export default function StoryboardPage() {
           </section>
         </main>
 
-        <aside style={{ position: 'sticky', top: 20 }}>
-          <div style={{ border: `0.5px solid ${br}`, borderRadius: 8, background: '#fffdf9', padding: 16, marginBottom: 16 }}>
+        <aside style={{ position: 'sticky', top: 84 }}>
+          <div style={{ ...card, padding: 16, marginBottom: 16 }}>
             <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, letterSpacing: '0.1em', color: mu, marginBottom: 12 }}>LIVE SUMMARY</p>
             <div style={{ display: 'grid', gap: 12 }}>
               {STEPS.map(s => {
                 const recommendation = getRecommendation(s, scripts[s.id] || '')
                 return (
-                  <div key={s.id} style={{ paddingBottom: 12, borderBottom: `0.5px solid ${br}` }}>
+                  <div key={s.id} style={{ paddingBottom: 12, borderBottom: `1px solid ${br}` }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
                       <span style={{ fontSize: 13 }}>{s.name}</span>
-                      <span style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: isDone(s) ? '#4a8a5c' : mu }}>
+                      <span style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: isDone(s) ? '#8df0b4' : mu }}>
                         {isDone(s) ? '已完成' : '未選'}
                       </span>
                     </div>
@@ -537,11 +548,11 @@ export default function StoryboardPage() {
                     <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: ink, lineHeight: 1.5, margin: '0 0 6px' }}>{recommendation.picks.join(' / ')}</p>
                     <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: mu, lineHeight: 1.5, margin: '0 0 8px' }}>{recommendation.reason}</p>
                     <div style={{ display: 'grid', gap: 6 }}>
-                      <div style={{ padding: '7px 8px', borderRadius: 6, background: hv }}>
+                      <div style={{ padding: '10px 10px', borderRadius: 12, background: 'rgba(255,255,255,0.04)' }}>
                         <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: mu, margin: '0 0 3px' }}>拍攝提示</p>
                         <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: ink, lineHeight: 1.5, margin: 0 }}>{recommendation.shootingTip}</p>
                       </div>
-                      <div style={{ padding: '7px 8px', borderRadius: 6, background: hv }}>
+                      <div style={{ padding: '10px 10px', borderRadius: 12, background: 'rgba(255,255,255,0.04)' }}>
                         <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: mu, margin: '0 0 3px' }}>剪接提示</p>
                         <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: ink, lineHeight: 1.5, margin: 0 }}>{recommendation.editTip}</p>
                       </div>
@@ -552,18 +563,18 @@ export default function StoryboardPage() {
             </div>
           </div>
 
-          <div style={{ border: `0.5px solid ${br}`, borderRadius: 8, background: hv, padding: 16 }}>
+          <div style={{ ...card, padding: 16 }}>
             <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, letterSpacing: '0.1em', color: mu, marginBottom: 8 }}>EXPORT DOCX</p>
             <input
               value={projectName}
               onChange={e => setProjectName(e.target.value)}
               placeholder="例：產品開箱 — 分鏡指引"
-              style={{ width: '100%', fontFamily: 'Georgia, serif', fontSize: 15, background: 'transparent', border: `0.5px solid ${br}`, borderRadius: 4, padding: '9px 11px', outline: 'none', color: ink, boxSizing: 'border-box', marginBottom: 8 }}
+              style={{ width: '100%', fontFamily: "'DM Sans', sans-serif", fontSize: 15, background: 'rgba(255,255,255,0.04)', border: `1px solid ${br}`, borderRadius: 14, padding: '12px 14px', outline: 'none', color: ink, boxSizing: 'border-box', marginBottom: 8 }}
             />
             <button
               onClick={generateDocx}
               disabled={generating}
-              style={{ width: '100%', fontFamily: 'system-ui, sans-serif', fontSize: 12, padding: '10px 16px', background: ink, color: cr, border: 'none', borderRadius: 4, cursor: 'pointer', opacity: generating ? 0.4 : 1 }}
+              style={{ width: '100%', fontFamily: 'system-ui, sans-serif', fontSize: 12, padding: '12px 16px', background: 'linear-gradient(135deg,#7b61ff,#5e8bff)', color: '#fff', border: 'none', borderRadius: 14, cursor: 'pointer', opacity: generating ? 0.4 : 1 }}
             >
               {generating ? '生成中...' : '生成 .docx ↓'}
             </button>
