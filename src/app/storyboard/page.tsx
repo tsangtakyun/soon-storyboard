@@ -30,8 +30,7 @@ export default function StoryboardPage() {
   const [hoveredVideo, setHoveredVideo] = useState<string | null>(null)
   const [audioEnabled, setAudioEnabled] = useState<string | null>(null)
   const [genStatus, setGenStatus] = useState('')
-  const [docLink, setDocLink] = useState('')
-  const [importing, setImporting] = useState(false)
+  const [manualScript, setManualScript] = useState('')
   const [importStatus, setImportStatus] = useState('')
   const [userId, setUserId] = useState('')
   const topicRef = useRef('')
@@ -71,6 +70,24 @@ export default function StoryboardPage() {
   }, [])
 
   useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type !== 'SOON_SCRIPT_SELECTED') return
+      const script = String(e.data.script || '')
+      const topic = String(e.data.topic || '')
+
+      setManualScript(script)
+      if (topic) {
+        topicRef.current = topic
+        setProjectName(topic)
+      }
+      if (script.trim()) void analyseScriptContent(script)
+    }
+
+    window.addEventListener('message', handler)
+    return () => window.removeEventListener('message', handler)
+  }, [])
+
+  useEffect(() => {
     const safeDecode = (value: string) => {
       try {
         return decodeURIComponent(value)
@@ -93,34 +110,7 @@ export default function StoryboardPage() {
 
     if (!scriptParam) return
 
-    const decodedScript = safeDecode(scriptParam)
-
-    const autoAnalyse = async () => {
-      setImportStatus('analysing')
-      try {
-        const res = await fetch('/api/analyse-script', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ content: decodedScript }),
-        })
-        const data = await res.json()
-        const nextScripts = {
-          opening: data.opening || '',
-          background: data.background || '',
-          transition: data.transition || '',
-          main: data.main || '',
-          ending: data.ending || '',
-        }
-
-        scriptsRef.current = nextScripts
-        setScripts(nextScripts)
-        setImportStatus('done')
-      } catch {
-        setImportStatus('error')
-      }
-    }
-
-    autoAnalyse()
+    void analyseScriptContent(safeDecode(scriptParam))
   }, [])
 
   useEffect(() => {
@@ -156,6 +146,38 @@ export default function StoryboardPage() {
         selections: JSON.stringify(nextSelections),
       }),
     })
+  }
+
+  async function analyseScriptContent(content: string) {
+    if (!content.trim()) return
+    setImportStatus('analysing')
+    try {
+      const res = await fetch('/api/analyse-script', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
+      })
+      const data = await res.json()
+      const nextScripts = {
+        opening: data.opening || '',
+        background: data.background || '',
+        transition: data.transition || '',
+        main: data.main || '',
+        ending: data.ending || '',
+      }
+
+      scriptsRef.current = nextScripts
+      setScripts(nextScripts)
+      setImportStatus('done')
+    } catch {
+      setImportStatus('error')
+    }
+  }
+
+  async function handleManualImport() {
+    if (!manualScript.trim()) return
+    await analyseScriptContent(manualScript)
+    setManualScript('')
   }
 
   function pickSingle(stepId: string, id: string) {
@@ -303,47 +325,6 @@ export default function StoryboardPage() {
       shootingTip: '產品最後停留一個乾淨畫面，方便做 end card。',
       editTip: '最後一個產品鏡頭可多留 8-12 frames 畀字幕或 logo。',
     }
-  }
-
-  async function importFromDoc() {
-    if (!docLink) return
-    setImporting(true)
-    setImportStatus('讀取 Google Doc 中...')
-    try {
-      const match = docLink.match(/\/d\/([a-zA-Z0-9_-]+)/)
-      if (!match) throw new Error('無效嘅 Google Doc 連結')
-      const docId = match[1]
-
-      const res = await fetch('/api/read-script', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ docId }),
-      })
-      const data = await res.json()
-      if (data.error) throw new Error(data.error)
-
-      setImportStatus('AI 分析 Script 中...')
-
-      const analyseRes = await fetch('/api/analyse-script', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: data.content }),
-      })
-      const analysed = await analyseRes.json()
-      if (analysed.error) throw new Error(analysed.error)
-
-      setScripts({
-        opening: analysed.opening || '',
-        background: analysed.background || '',
-        transition: analysed.transition || '',
-        main: analysed.main || '',
-        ending: analysed.ending || '',
-      })
-      setImportStatus('✓ Script 已匯入，可以開始揀分鏡')
-    } catch (err: any) {
-      setImportStatus('匯入失敗：' + err.message)
-    }
-    setImporting(false)
   }
 
   async function generateDocx() {
@@ -515,27 +496,39 @@ export default function StoryboardPage() {
 
       <div style={{ padding: '8px 24px 40px', display: 'grid', gridTemplateColumns: '320px minmax(0, 1fr) 320px', gap: 20, alignItems: 'start' }}>
         <aside style={{ position: 'sticky', top: 84 }}>
-          <div style={{ ...card, background: cardBg, padding: 16, marginBottom: 16 }}>
-            <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, letterSpacing: '0.1em', color: mu, marginBottom: 8 }}>IMPORT SCRIPT</p>
-            <div style={{ display: 'grid', gap: 8 }}>
-              <input
-                value={docLink}
-                onChange={e => setDocLink(e.target.value)}
-                placeholder="貼入 Google Doc 連結..."
-                style={{ width: '100%', fontFamily: "'DM Sans', sans-serif", fontSize: 13, background: 'rgba(255,255,255,0.04)', border: `1px solid ${br}`, borderRadius: 14, padding: '12px 14px', outline: 'none', color: ink, boxSizing: 'border-box' }}
-              />
-              <button
-                onClick={importFromDoc}
-                disabled={importing}
-                style={{ fontFamily: 'system-ui, sans-serif', fontSize: 12, padding: '12px 14px', background: 'linear-gradient(135deg,#7b61ff,#5e8bff)', color: '#fff', border: 'none', borderRadius: 14, cursor: importing ? 'not-allowed' : 'pointer', opacity: importing ? 0.5 : 1 }}
-              >
-                {importing ? '匯入中...' : '匯入 Script →'}
-              </button>
-            </div>
-            {importStatus && (
-              <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: importStatus.startsWith('✓') ? '#4a8a5c' : mu, marginTop: 8, lineHeight: 1.5 }}>
-                {importStatus}
-              </p>
+          <div style={{ ...card, background: 'var(--bg-card, #16161f)', border: '1px solid var(--border-subtle, #2a2a3a)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+            <p style={{ fontSize: 12, color: '#5a5a72', marginBottom: 12, fontWeight: 500 }}>{'\u532f\u5165\u5287\u672c'}</p>
+
+            <button
+              onClick={() => window.parent.postMessage({ type: 'SOON_REQUEST_SCRIPT' }, '*')}
+              style={{ width: '100%', padding: 10, background: '#7c5cfc', color: 'white', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: 'pointer', marginBottom: 8 }}
+            >
+              {'\ud83d\udcc4 \u5f9e\u6587\u4ef6\u4e2d\u5fc3\u9078\u53d6'}
+            </button>
+
+            <textarea
+              placeholder={'\u6216\u76f4\u63a5\u8cbc\u5165\u5287\u672c\u6587\u5b57...'}
+              value={manualScript}
+              onChange={e => setManualScript(e.target.value)}
+              style={{ width: '100%', height: 80, background: '#111118', border: '1px solid #2a2a3a', borderRadius: 8, color: '#f0f0f5', fontSize: 12, padding: 8, resize: 'none', marginBottom: 8, boxSizing: 'border-box' }}
+            />
+
+            <button
+              onClick={handleManualImport}
+              disabled={!manualScript.trim()}
+              style={{ width: '100%', padding: 10, background: manualScript.trim() ? '#111118' : 'transparent', color: manualScript.trim() ? '#f0f0f5' : '#5a5a72', border: '1px solid #2a2a3a', borderRadius: 8, fontSize: 13, cursor: manualScript.trim() ? 'pointer' : 'not-allowed' }}
+            >
+              {'\u5206\u6790\u4e26\u586b\u5165 \u2192'}
+            </button>
+
+            {importStatus === 'analysing' && (
+              <p style={{ fontSize: 12, color: '#9090a8', marginTop: 8, textAlign: 'center' }}>{'AI \u5206\u6790\u4e2d...'}</p>
+            )}
+            {importStatus === 'done' && (
+              <p style={{ fontSize: 12, color: '#10b981', marginTop: 8, textAlign: 'center' }}>{'\u2713 \u5df2\u586b\u5165 5 \u6bb5\u5287\u672c'}</p>
+            )}
+            {importStatus === 'error' && (
+              <p style={{ fontSize: 12, color: '#ef4444', marginTop: 8, textAlign: 'center' }}>{'\u5206\u6790\u5931\u6557\uff0c\u8acb\u91cd\u8a66'}</p>
             )}
           </div>
 
