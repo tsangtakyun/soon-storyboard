@@ -498,7 +498,7 @@ export default function StoryboardPage() {
         ))}
       </div>
 
-      <div style={{ padding: '8px 24px 40px', display: 'grid', gridTemplateColumns: '320px minmax(0, 1fr) 320px', gap: 20, alignItems: 'start' }}>
+      <div style={{ padding: '8px 24px 40px', display: 'grid', gridTemplateColumns: '320px minmax(0, 1fr)', gap: 20, alignItems: 'start' }}>
         <aside style={{ position: 'sticky', top: 84 }}>
           <div style={{ ...card, background: 'var(--bg-card, #16161f)', border: '1px solid var(--border-subtle, #2a2a3a)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
             <p style={{ fontSize: 12, color: '#5a5a72', marginBottom: 12, fontWeight: 500 }}>{'\u532f\u5165\u5287\u672c'}</p>
@@ -665,92 +665,41 @@ export default function StoryboardPage() {
               })}
             </div>
           </section>
+
+          {genStatus && <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: mu, marginTop: 12, lineHeight: 1.5 }}>{genStatus}</p>}
+
+          {doneCount() === STEPS.length && (
+            <button
+              onClick={() => {
+                saveStoryboard()
+                window.parent.postMessage(
+                  {
+                    type: 'SOON_NAVIGATE_TOOL',
+                    pipeline: 'ig',
+                    tool: 'subtitle',
+                    topic: projectName,
+                    script: Object.values(scripts).join('\n\n'),
+                  },
+                  '*'
+                )
+              }}
+              style={{
+                background: '#10b981',
+                color: 'white',
+                border: 'none',
+                borderRadius: 8,
+                padding: '10px 20px',
+                fontSize: 14,
+                fontWeight: 500,
+                cursor: 'pointer',
+                marginTop: 18,
+              }}
+            >
+              {'\u2705 \u5206\u93e1\u5b8c\u6210\uff0c\u63a8\u53bb\u5b57\u5e55\u5de5\u4f5c\u53f0'}
+            </button>
+          )}
         </main>
 
-        <aside style={{ position: 'sticky', top: 84 }}>
-          <div style={{ ...card, padding: 16, marginBottom: 16 }}>
-            <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, letterSpacing: '0.1em', color: mu, marginBottom: 12 }}>LIVE SUMMARY</p>
-            <div style={{ display: 'grid', gap: 12 }}>
-              {STEPS.map(s => {
-                const recommendation = getRecommendation(s, scripts[s.id] || '')
-                return (
-                  <div key={s.id} style={{ paddingBottom: 12, borderBottom: `1px solid ${br}` }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
-                      <span style={{ fontSize: 13 }}>{s.name}</span>
-                      <span style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: isDone(s) ? '#8df0b4' : mu }}>
-                        {isDone(s) ? '已完成' : '未選'}
-                      </span>
-                    </div>
-                    <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: mu, margin: '0 0 4px' }}>已選拍法</p>
-                    <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: mu, lineHeight: 1.5, margin: '0 0 8px' }}>{getLabels(s).join(' / ')}</p>
-                    <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: mu, margin: '0 0 4px' }}>推薦拍法組合</p>
-                    <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: ink, lineHeight: 1.5, margin: '0 0 6px' }}>{recommendation.picks.join(' / ')}</p>
-                    <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: mu, lineHeight: 1.5, margin: '0 0 8px' }}>{recommendation.reason}</p>
-                    <div style={{ display: 'grid', gap: 6 }}>
-                      <div style={{ padding: '10px 10px', borderRadius: 12, background: 'rgba(255,255,255,0.04)' }}>
-                        <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: mu, margin: '0 0 3px' }}>拍攝提示</p>
-                        <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: ink, lineHeight: 1.5, margin: 0 }}>{recommendation.shootingTip}</p>
-                      </div>
-                      <div style={{ padding: '10px 10px', borderRadius: 12, background: 'rgba(255,255,255,0.04)' }}>
-                        <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, color: mu, margin: '0 0 3px' }}>剪接提示</p>
-                        <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: ink, lineHeight: 1.5, margin: 0 }}>{recommendation.editTip}</p>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-
-          <div style={{ ...card, padding: 16 }}>
-            <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, letterSpacing: '0.1em', color: mu, marginBottom: 8 }}>EXPORT DOCX</p>
-            <input
-              value={projectName}
-              onChange={e => setProjectName(e.target.value)}
-              placeholder="例：產品開箱 — 分鏡指引"
-              style={{ width: '100%', fontFamily: "'DM Sans', sans-serif", fontSize: 15, background: 'rgba(255,255,255,0.04)', border: `1px solid ${br}`, borderRadius: 14, padding: '12px 14px', outline: 'none', color: ink, boxSizing: 'border-box', marginBottom: 8 }}
-            />
-            <button
-              onClick={generateDocx}
-              disabled={generating}
-              style={{ width: '100%', fontFamily: 'system-ui, sans-serif', fontSize: 12, padding: '12px 16px', background: 'linear-gradient(135deg,#7b61ff,#5e8bff)', color: '#fff', border: 'none', borderRadius: 14, cursor: 'pointer', opacity: generating ? 0.4 : 1 }}
-            >
-              {generating ? '生成中...' : '生成 .docx ↓'}
-            </button>
-            {genStatus && <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: mu, marginTop: 8, lineHeight: 1.5 }}>{genStatus}</p>}
-            {doneCount() === STEPS.length && (
-              <button
-                onClick={() => {
-                  saveStoryboard()
-                  window.parent.postMessage(
-                    {
-                      type: 'SOON_NAVIGATE_TOOL',
-                      pipeline: 'ig',
-                      tool: 'subtitle',
-                      topic: projectName,
-                      script: Object.values(scripts).join('\n\n'),
-                    },
-                    '*'
-                  )
-                }}
-                style={{
-                  background: '#10b981',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 8,
-                  padding: '10px 20px',
-                  fontSize: 14,
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  marginTop: 16,
-                  width: '100%',
-                }}
-              >
-                {'\u2705 \u5206\u93e1\u5b8c\u6210\uff0c\u63a8\u53bb\u5b57\u5e55\u5de5\u4f5c\u53f0'}
-              </button>
-            )}
-          </div>
-        </aside>
       </div>
     </div>
   )
