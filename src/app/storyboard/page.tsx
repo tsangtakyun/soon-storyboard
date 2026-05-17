@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { STEPS, Step } from './data/shots'
 
@@ -33,6 +33,11 @@ export default function StoryboardPage() {
   const [docLink, setDocLink] = useState('')
   const [importing, setImporting] = useState(false)
   const [importStatus, setImportStatus] = useState('')
+  const [userId, setUserId] = useState('')
+  const topicRef = useRef('')
+  const scriptsRef = useRef<Scripts>({})
+  const selectionsRef = useRef<Selections>({})
+  const projectNameRef = useRef('')
 
   const step = STEPS[currentStep]
   const card = {
@@ -41,6 +46,91 @@ export default function StoryboardPage() {
     borderRadius: 22,
     boxShadow: '0 18px 40px rgba(4, 6, 20, 0.26)',
   } as const
+
+  useEffect(() => {
+    scriptsRef.current = scripts
+  }, [scripts])
+
+  useEffect(() => {
+    selectionsRef.current = selections
+  }, [selections])
+
+  useEffect(() => {
+    projectNameRef.current = projectName
+  }, [projectName])
+
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === 'SOON_AUTH') {
+        setUserId(e.data.userId || '')
+      }
+    }
+
+    window.addEventListener('message', handler)
+    return () => window.removeEventListener('message', handler)
+  }, [])
+
+  useEffect(() => {
+    const safeDecode = (value: string) => {
+      try {
+        return decodeURIComponent(value)
+      } catch {
+        return value
+      }
+    }
+
+    const params = new URLSearchParams(window.location.search)
+    const topic = params.get('topic') || ''
+    const brand = params.get('brand') || ''
+    const scriptParam = params.get('script')
+    const name = topic || brand || ''
+
+    if (name) {
+      const decodedName = safeDecode(name)
+      topicRef.current = decodedName
+      setProjectName(decodedName)
+    }
+
+    if (!scriptParam) return
+
+    const decodedScript = safeDecode(scriptParam)
+
+    const autoAnalyse = async () => {
+      setImportStatus('analysing')
+      try {
+        const res = await fetch('/api/analyse-script', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: decodedScript }),
+        })
+        const data = await res.json()
+        const nextScripts = {
+          opening: data.opening || '',
+          background: data.background || '',
+          transition: data.transition || '',
+          main: data.main || '',
+          ending: data.ending || '',
+        }
+
+        scriptsRef.current = nextScripts
+        setScripts(nextScripts)
+        setImportStatus('done')
+      } catch {
+        setImportStatus('error')
+      }
+    }
+
+    autoAnalyse()
+  }, [])
+
+  useEffect(() => {
+    const handler = () => {
+      saveStoryboard()
+    }
+
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [userId])
 
   function isDone(s: Step) {
     const sel = selections[s.id]
@@ -52,18 +142,40 @@ export default function StoryboardPage() {
     return STEPS.filter(isDone).length
   }
 
+  async function saveStoryboard(nextSelections = selectionsRef.current, nextScripts = scriptsRef.current) {
+    if (!userId) return
+
+    await fetch('/api/storyboards', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: userId,
+        project_name: projectNameRef.current,
+        topic: topicRef.current || projectNameRef.current,
+        scripts: JSON.stringify(nextScripts),
+        selections: JSON.stringify(nextSelections),
+      }),
+    })
+  }
+
   function pickSingle(stepId: string, id: string) {
-    setSelections(prev => ({ ...prev, [stepId]: id }))
+    const next = { ...selectionsRef.current, [stepId]: id }
+    selectionsRef.current = next
+    setSelections(next)
+    saveStoryboard(next)
   }
 
   function pickMulti(stepId: string, id: string) {
     setSelections(prev => {
       const current = (prev[stepId] as string[]) || []
       const exists = current.includes(id)
-      return {
+      const next = {
         ...prev,
         [stepId]: exists ? current.filter(item => item !== id) : [...current, id],
       }
+      selectionsRef.current = next
+      saveStoryboard(next)
+      return next
     })
   }
 
@@ -609,6 +721,37 @@ export default function StoryboardPage() {
               {generating ? '生成中...' : '生成 .docx ↓'}
             </button>
             {genStatus && <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 11, color: mu, marginTop: 8, lineHeight: 1.5 }}>{genStatus}</p>}
+            {doneCount() === STEPS.length && (
+              <button
+                onClick={() => {
+                  saveStoryboard()
+                  window.parent.postMessage(
+                    {
+                      type: 'SOON_NAVIGATE_TOOL',
+                      pipeline: 'ig',
+                      tool: 'subtitle',
+                      topic: projectName,
+                      script: Object.values(scripts).join('\n\n'),
+                    },
+                    '*'
+                  )
+                }}
+                style={{
+                  background: '#10b981',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '10px 20px',
+                  fontSize: 14,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  marginTop: 16,
+                  width: '100%',
+                }}
+              >
+                {'\u2705 \u5206\u93e1\u5b8c\u6210\uff0c\u63a8\u53bb\u5b57\u5e55\u5de5\u4f5c\u53f0'}
+              </button>
+            )}
           </div>
         </aside>
       </div>
