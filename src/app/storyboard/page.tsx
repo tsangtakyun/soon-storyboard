@@ -415,7 +415,7 @@ export default function StoryboardPage() {
 
       children.push(
         new Paragraph({
-          children: [new TextRun({ text: `生成於 ${ds} · SOON Internal System`, font: 'Arial', size: 18, color: 'aaa89e', italics: true })],
+          children: [new TextRun({ text: `生成於 ${ds} · SOON Storyboard System`, font: 'Arial', size: 18, color: 'aaa89e', italics: true })],
           spacing: { before: 600 },
           alignment: AlignmentType.CENTER,
         })
@@ -477,7 +477,7 @@ export default function StoryboardPage() {
       <img
         src="/storyboard-banner.jpg"
         alt="IG Reel storyboard banner"
-        style={{ width: 'calc(100% - 48px)', height: 160, objectFit: 'cover', objectPosition: 'center', borderRadius: 12, margin: '0 24px 16px', display: 'block' }}
+        style={{ width: '100%', height: 160, objectFit: 'cover', objectPosition: 'center', borderRadius: 12, display: 'block', marginBottom: 16 }}
       />
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0 24px 20px' }}>

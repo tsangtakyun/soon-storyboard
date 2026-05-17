@@ -25,7 +25,7 @@ function LoginContent() {
           <span style={{ width: '12px', height: '12px', borderRadius: '999px', background: '#ff7b4d', display: 'inline-block' }} />
           <span style={{ width: '12px', height: '12px', borderRadius: '999px', background: '#7b61ff', display: 'inline-block' }} />
           <span style={{ width: '12px', height: '12px', borderRadius: '999px', background: '#5e8bff', display: 'inline-block' }} />
-          <span style={{ marginLeft: '8px', fontSize: '15px', fontWeight: 700, color: '#f7f8ff' }}>SOON Internal</span>
+          <span style={{ marginLeft: '8px', fontSize: '15px', fontWeight: 700, color: '#f7f8ff' }}>SOON Storyboard</span>
         </div>
         <p style={{ fontSize: '12px', letterSpacing: '0.16em', color: '#8e94ba', marginBottom: '10px', textTransform: 'uppercase' }}>SOON 分鏡工作台</p>
         <h1 style={{ fontSize: '42px', lineHeight: 1.02, fontWeight: 600, color: '#f5f7ff', margin: '0 0 14px' }}>登入分鏡系統</h1>
