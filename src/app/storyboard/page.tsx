@@ -7,11 +7,12 @@ import { STEPS, Step } from './data/shots'
 type Selections = { [stepId: string]: string | string[] }
 type Scripts = { [stepId: string]: string }
 
-const cr = '#171a2f'
-const ink = '#f5f7ff'
-const mu = '#8e94ba'
-const br = 'rgba(255,255,255,0.08)'
+const cr = '#0a0a0f'
+const ink = '#f0f0f5'
+const mu = '#9090a8'
+const br = '#2a2a3a'
 const hv = 'rgba(255,255,255,0.04)'
+const cardBg = '#16161f'
 
 type Recommendation = {
   picks: string[]
@@ -36,7 +37,7 @@ export default function StoryboardPage() {
   const step = STEPS[currentStep]
   const card = {
     border: `1px solid ${br}`,
-    background: 'rgba(34, 38, 68, 0.88)',
+    background: cardBg,
     borderRadius: 22,
     boxShadow: '0 18px 40px rgba(4, 6, 20, 0.26)',
   } as const
@@ -356,24 +357,53 @@ export default function StoryboardPage() {
   return (
     <div style={{ minHeight: '100vh', background: cr, color: ink, fontFamily: "'DM Sans', sans-serif" }}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet" />
-      <header style={{ padding: '28px 24px 12px' }}>
-        <div style={{ ...card, padding: 28 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            <div>
-              <p style={{ fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: mu, margin: '0 0 10px' }}>SOON 分鏡工作台</p>
-              <h1 style={{ fontSize: 46, lineHeight: 1.02, fontWeight: 600, margin: 0 }}>IG Reel 分鏡工作台</h1>
-              <p style={{ fontSize: 15, color: '#c9cdec', margin: '14px 0 0', lineHeight: 1.7, maxWidth: 760 }}>左邊導入劇本，中間選鏡頭與拍法，右邊即時檢查每一段建議與整體節奏，直接承接 SOON 內部劇本流程。</p>
-            </div>
-            <div style={{ padding: '14px 16px', borderRadius: 16, border: '1px solid rgba(130,126,255,0.3)', background: 'rgba(111,107,255,0.12)', fontSize: 13, color: '#c9cdec' }}>
-              {doneCount()} / {STEPS.length} 段已完成
-            </div>
-          </div>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '24px 24px 0', marginBottom: 16 }}>
+        <div>
+          <p style={{ fontSize: 12, color: '#5a5a72', margin: '0 0 4px' }}>{'SOON \u5206\u93e1\u5de5\u4f5c\u53f0'}</p>
+          <h1 style={{ fontSize: 28, fontWeight: 700, color: '#f0f0f5', margin: 0 }}>{'IG Reel \u5206\u93e1\u5de5\u4f5c\u53f0'}</h1>
+          <p style={{ fontSize: 13, color: '#9090a8', margin: '6px 0 0' }}>{'\u9078\u64c7\u6bcf\u6bb5\u62cd\u651d\u65b9\u6cd5\uff0c\u5b8c\u6210\u5f8c\u81ea\u52d5\u751f\u6210\u5206\u93e1\u6307\u5f15'}</p>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <span style={{ fontSize: 13, color: '#9090a8', padding: '8px 14px', border: '1px solid #2a2a3a', borderRadius: 8 }}>
+            {doneCount()} / {STEPS.length} {'\u6bb5\u5df2\u5b8c\u6210'}
+          </span>
+          <button
+            onClick={generateDocx}
+            disabled={generating}
+            style={{ background: '#10b981', color: 'white', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 500, cursor: generating ? 'not-allowed' : 'pointer', opacity: generating ? 0.6 : 1 }}
+          >
+            {'\ud83d\udce5 \u532f\u51fa Word'}
+          </button>
         </div>
       </header>
 
+      <img
+        src="/storyboard-banner.jpg"
+        alt="IG Reel storyboard banner"
+        style={{ width: 'calc(100% - 48px)', height: 160, objectFit: 'cover', objectPosition: 'center', borderRadius: 12, margin: '0 24px 16px', display: 'block' }}
+      />
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0 24px 20px' }}>
+        {[
+          { n: 1, label: '\u984c\u6750\u5de5\u4f5c\u53f0', active: false },
+          { n: 2, label: '\u5287\u672c\u5de5\u4f5c\u53f0', active: false },
+          { n: 3, label: '\u5206\u93e1\u5de5\u4f5c\u53f0', active: true },
+        ].map((item, index, arr) => (
+          <div key={item.n} style={{ display: 'contents' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', background: item.active ? '#7c5cfc' : '#2a2a3a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: item.active ? 'white' : '#5a5a72', fontWeight: item.active ? 600 : 400 }}>
+                {item.n}
+              </div>
+              <span style={{ fontSize: 13, color: item.active ? '#f0f0f5' : '#5a5a72', fontWeight: item.active ? 500 : 400 }}>{item.label}</span>
+            </div>
+            {index < arr.length - 1 && <div style={{ flex: 1, height: 1, background: '#2a2a3a' }} />}
+          </div>
+        ))}
+      </div>
+
       <div style={{ padding: '8px 24px 40px', display: 'grid', gridTemplateColumns: '320px minmax(0, 1fr) 320px', gap: 20, alignItems: 'start' }}>
         <aside style={{ position: 'sticky', top: 84 }}>
-          <div style={{ ...card, background: 'rgba(34, 38, 68, 0.96)', padding: 16, marginBottom: 16 }}>
+          <div style={{ ...card, background: cardBg, padding: 16, marginBottom: 16 }}>
             <p style={{ fontFamily: 'system-ui, sans-serif', fontSize: 10, letterSpacing: '0.1em', color: mu, marginBottom: 8 }}>IMPORT SCRIPT</p>
             <div style={{ display: 'grid', gap: 8 }}>
               <input
@@ -463,7 +493,7 @@ export default function StoryboardPage() {
                     border: `1px solid ${selected ? 'rgba(130,126,255,0.52)' : br}`,
                     borderRadius: 18,
                     padding: 10,
-                    background: selected ? 'rgba(111,107,255,0.12)' : 'rgba(34, 38, 68, 0.88)',
+                    background: selected ? 'rgba(124,92,252,0.16)' : cardBg,
                     cursor: 'pointer',
                   }}
                 >
