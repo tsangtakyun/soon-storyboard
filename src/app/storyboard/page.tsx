@@ -180,6 +180,30 @@ export default function StoryboardPage() {
     setManualScript('')
   }
 
+  function getCoreDocsUrl() {
+    try {
+      const referrerUrl = document.referrer ? new URL(document.referrer) : null
+      const origin = referrerUrl?.origin || 'https://soon-core.vercel.app'
+      return `${origin}/docs?select_for_storyboard=true`
+    } catch {
+      return 'https://soon-core.vercel.app/docs?select_for_storyboard=true'
+    }
+  }
+
+  function requestScriptFromDocs() {
+    window.parent.postMessage({ type: 'SOON_REQUEST_SCRIPT' }, '*')
+
+    if (window.parent !== window) {
+      window.setTimeout(() => {
+        try {
+          window.top!.location.href = getCoreDocsUrl()
+        } catch {
+          window.location.href = getCoreDocsUrl()
+        }
+      }, 350)
+    }
+  }
+
   function pickSingle(stepId: string, id: string) {
     const next = { ...selectionsRef.current, [stepId]: id }
     selectionsRef.current = next
@@ -500,7 +524,7 @@ export default function StoryboardPage() {
             <p style={{ fontSize: 12, color: '#5a5a72', marginBottom: 12, fontWeight: 500 }}>{'\u532f\u5165\u5287\u672c'}</p>
 
             <button
-              onClick={() => window.parent.postMessage({ type: 'SOON_REQUEST_SCRIPT' }, '*')}
+              onClick={requestScriptFromDocs}
               style={{ width: '100%', padding: 10, background: '#7c5cfc', color: 'white', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: 'pointer', marginBottom: 8 }}
             >
               {'\ud83d\udcc4 \u5f9e\u6587\u4ef6\u4e2d\u5fc3\u9078\u53d6'}
