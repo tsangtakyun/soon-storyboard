@@ -180,28 +180,8 @@ export default function StoryboardPage() {
     setManualScript('')
   }
 
-  function getCoreDocsUrl() {
-    try {
-      const referrerUrl = document.referrer ? new URL(document.referrer) : null
-      const origin = referrerUrl?.origin || 'https://soon-core.vercel.app'
-      return `${origin}/docs?select_for_storyboard=true`
-    } catch {
-      return 'https://soon-core.vercel.app/docs?select_for_storyboard=true'
-    }
-  }
-
   function requestScriptFromDocs() {
     window.parent.postMessage({ type: 'SOON_REQUEST_SCRIPT' }, '*')
-
-    if (window.parent !== window) {
-      window.setTimeout(() => {
-        try {
-          window.top!.location.href = getCoreDocsUrl()
-        } catch {
-          window.location.href = getCoreDocsUrl()
-        }
-      }, 350)
-    }
   }
 
   function pickSingle(stepId: string, id: string) {
