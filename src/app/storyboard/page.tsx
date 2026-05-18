@@ -477,7 +477,7 @@ export default function StoryboardPage() {
       <img
         src="/storyboard-banner.jpg"
         alt="IG Reel storyboard banner"
-        style={{ width: '100%', height: 160, objectFit: 'cover', objectPosition: 'center', borderRadius: 12, display: 'block', marginBottom: 16 }}
+        style={{ width: '100%', height: 160, objectFit: 'cover', objectPosition: 'center', borderRadius: 12, display: 'block', marginBottom: 16, marginTop: 12 }}
       />
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0 24px 20px' }}>
