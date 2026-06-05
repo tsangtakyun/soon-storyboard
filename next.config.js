@@ -9,12 +9,8 @@ const nextConfig = {
         source: '/:path*',
         headers: [
           {
-            key: 'X-Frame-Options',
-            value: 'ALLOW-FROM https://egg.sooncreator.network',
-          },
-          {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors 'self' https://egg.sooncreator.network",
+            value: "frame-ancestors 'self' https://soon-core.vercel.app https://*.vercel.app https://egg.sooncreator.network",
           },
         ],
       },
